@@ -12,9 +12,10 @@ attr_reader :entry_station, :exit_station, :balance, :journeys
 
   def initialize
      @balance = 0
-     @entry_station = nil
-     @exit_station = nil
+     #@entry_station = nil
+     #@exit_station = nil
      @journeys = []
+     @journey = Journey.new
   end
 
   def top_up(amount)
@@ -24,20 +25,22 @@ attr_reader :entry_station, :exit_station, :balance, :journeys
 
   def touch_in(entry_station)
     raise "Insufficient funds" if @balance < MINIMUM_BALANCE
-    @entry_station = entry_station
     @journeys << { entry_station: entry_station }
+    @journey.start(entry_station)
+    #@entry_station = entry_station
+    deduct(@journey.fare)
   end
 
   def touch_out(exit_station)
-    @exit_station = exit_station
-    deduct(MINIMUM_FARE)
     @journeys.last[:exit_station] = exit_station
-    @entry_station = nil
-
+    #@entry_station = nil
+    @journey.finish(exit_station)
+    #@exit_station = exit_station
+    deduct(@journey.fare)
   end
 
   def in_journey?
-    @entry_station != nil
+    @journey.started?
     #return false if @entry_station == nil
     #true if @entry_station == entry_station
     #false
